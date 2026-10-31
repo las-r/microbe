@@ -1,5 +1,5 @@
-import opcodes as opc
-from nodes import Function
+from microbe.nodes import Function
+import microbe.opcodes as opc
 
 # microbe vm
 # by las-r

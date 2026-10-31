@@ -1,4 +1,4 @@
-import opcodes as opc
+import microbe.opcodes as opc
 
 # microbe nodes
 # forked from micro

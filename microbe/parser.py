@@ -1,4 +1,4 @@
-from .nodes import *
+from microbe.nodes import *
 
 # microbe parser
 # forked from micro
@@ -156,12 +156,6 @@ def parsestmt(tokens):
         else:
             expr = None
         return ReturnNode(expr)
-    
-    # import statement
-    if tokens.peek() == "import":
-        tokens.eat()
-        path = parseexpr(tokens)
-        return ImportNode(path)
     
     # assignment
     lhs = parseexpr(tokens)

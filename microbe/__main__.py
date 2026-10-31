@@ -1,9 +1,8 @@
-import os
 import sys
-from . import lexer
-from . import parser
-from . import nodes
-from . import vm
+from microbe import lexer
+from microbe import parser
+from microbe import nodes
+from microbe import vm
 
 # microbe
 # forked from micro
@@ -46,7 +45,9 @@ def main():
     # compile
     tokens = lexer.tokenize(code)
     nodes = parser.parse(tokens)
-    stream = [n.compile(stream) for n in nodes]
+    stream = []
+    for n in nodes:
+        n.compile(stream)
 
     # native functions
     natives = {

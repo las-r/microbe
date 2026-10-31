@@ -224,3 +224,4 @@ __marimo__/
 !examples/*.mic
 !libraries/*.mic
 *.mbc
+test.py
