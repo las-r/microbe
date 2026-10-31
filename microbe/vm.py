@@ -25,6 +25,7 @@ def resolveLabels(stream):
 
 # virtual machine
 class MicrobeVM:
-    def __init__(self, stream):
+    def __init__(self, stream, natives):
+        self.natives = natives
         self.stream = resolveLabels(stream)
         self.ip = 0

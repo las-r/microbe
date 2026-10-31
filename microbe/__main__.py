@@ -3,12 +3,13 @@ import sys
 from . import lexer
 from . import parser
 from . import nodes
+from . import vm
 
 # microbe
 # forked from micro
 # by las-r
 
-# inbuilt functions
+# native functions
 def ibtype(x):
     if isinstance(x, list): return "arr"
     if isinstance(x, float): return "float"
@@ -34,18 +35,21 @@ def ibdel(a, i):
     return ac
 
 def main():
+    # open code
     if len(sys.argv) < 2:
-        print("usage: python -m micro <file.mic>")
+        print("usage: python -m microbe <file.mic>")
         return
-    
     file = sys.argv[1]
     with open(file) as f:
         code = f.read()
-        
+
+    # compile
     tokens = lexer.tokenize(code)
     nodes = parser.parse(tokens)
-    
-    env = {
+    stream = [n.compile(stream) for n in nodes]
+
+    # native functions
+    natives = {
         "print": print,
         "input": input,
         "type": ibtype,
@@ -54,8 +58,10 @@ def main():
         "add": ibadd,
         "del": ibdel
     }
-    for node in nodes:
-        node.eval(env, [os.path.abspath(file)])
+
+    # vm
+    mvm = vm.MicrobeVM(stream, natives)
+    vm.execute()
         
 if __name__ == "__main__":
     main()
