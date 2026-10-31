@@ -1,4 +1,4 @@
-import os
+import opcodes as opc
 
 # microbe nodes
 # forked from micro
@@ -14,10 +14,9 @@ class Return(Exception):
 
 # function object
 class Function:
-    def __init__(self, params, body, env):
+    def __init__(self, params, entry):
         self.params = params
-        self.body = body
-        self.env = env
+        self.entry = entry
 
 # literal node
 class LiteralNode:
@@ -131,14 +130,6 @@ class CallNode:
 class ReturnNode:
     def __init__(self, expr):
         self.expr = expr
-
-    def compile(self, stream):
-        pass
-
-# import nodes
-class ImportNode:
-    def __init__(self, path):
-        self.path = path
 
     def compile(self, stream):
         pass
