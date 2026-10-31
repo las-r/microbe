@@ -18,3 +18,5 @@ jmpifn = 10
 
 call = 11
 ret = 12
+
+arr = 13

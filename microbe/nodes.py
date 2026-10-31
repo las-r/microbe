@@ -4,6 +4,13 @@ import opcodes as opc
 # forked from micro
 # by las-r
 
+# loop counter
+loopc = 0
+def get_unique_loop_id():
+    global loopc
+    loopc += 1
+    return loopc
+
 # exceptions
 class Break(Exception):
     pass
@@ -24,7 +31,7 @@ class LiteralNode:
         self.value = value
 
     def compile(self, stream):
-        pass
+        stream.append([opc.ld, self.value])
 
 # variable nodes
 class VariableNode:
@@ -32,7 +39,7 @@ class VariableNode:
         self.name = name
 
     def compile(self, stream):
-        pass
+        stream.append([opc.varget, self.name])
 
 class AssignNode:
     def __init__(self, name, expr):
@@ -40,7 +47,8 @@ class AssignNode:
         self.expr = expr
 
     def compile(self, stream):
-        pass
+        self.expr.compile(stream)
+        stream.append([opc.varset, self.name])
 
 # operation nodes
 class UnaryOpNode:
@@ -49,7 +57,8 @@ class UnaryOpNode:
         self.a = a
 
     def compile(self, stream):
-        pass
+        self.a.compile(stream)
+        stream.append([opc.unop, self.op])
 
 class BinaryOpNode:
     def __init__(self, a, op, b):
@@ -58,7 +67,9 @@ class BinaryOpNode:
         self.b = b
 
     def compile(self, stream):
-        pass
+        self.a.compile(stream)
+        self.b.compile(stream)
+        stream.append([opc.binop, self.op])
 
 # array nodes
 class ArrayNode:
@@ -66,7 +77,9 @@ class ArrayNode:
         self.items = items
 
     def compile(self, stream):
-        pass
+        for i in self.items:
+            i.compile(stream)
+        stream.append([opc.arr, len(self.items)])
 
 class IndexNode:
     def __init__(self, arr, idx):
@@ -74,7 +87,9 @@ class IndexNode:
         self.idx = idx
 
     def compile(self, stream):
-        pass
+        self.arr.compile(stream)
+        self.idx.compile(stream)
+        stream.append([opc.arriget])
 
 class IndexAssignNode:
     def __init__(self, arr, idx, val):
@@ -83,7 +98,10 @@ class IndexAssignNode:
         self.val = val
 
     def compile(self, stream):
-        pass
+        self.arr.compile(stream)
+        self.idx.compile(stream)
+        self.val.compile(stream)
+        stream.append([opc.arriset])
 
 # control flow nodes
 class IfNode:
@@ -93,7 +111,19 @@ class IfNode:
         self.ebody = ebody
 
     def compile(self, stream):
-        pass
+        ifid = get_unique_loop_id()
+        elselbl = f"ELSE_START_{ifid}"
+        endlbl = f"IF_END_{ifid}"
+        self.cond.compile(stream)
+        stream.append([opc.jmpifn, elselbl])
+        for stmt in self.body:
+            stmt.compile(stream)
+        stream.append([opc.jmp, endlbl])
+        stream.append(["LABEL", elselbl])
+        if self.ebody:
+            for stmt in self.ebody:
+                stmt.compile(stream)
+        stream.append(["LABEL", endlbl])
 
 class WhileNode:
     def __init__(self, cond, body):
@@ -101,14 +131,24 @@ class WhileNode:
             self.body = body
 
     def compile(self, stream):
-        pass
+        loopid = get_unique_loop_id()
+        startlbl = f"WHILE_START_{loopid}"
+        endlbl = f"WHILE_END_{loopid}"
+        stream.append(["LABEL", startlbl])
+        self.cond.compile(stream)
+        stream.append([opc.jmpifn, endlbl])
+        for stmt in self.body:
+            stmt.compile(stream)
+        stream.append([opc.jmp, startlbl])
+        stream.append(["LABEL", endlbl])
 
 class BreakNode:
     def __init__(self):
         pass
 
     def compile(self, stream):
-        pass
+        lbl = f"WHILE_END_{loopc}"
+        stream.append([opc.jmp, lbl])
 
 # function nodes
 class FunctionNode:
@@ -118,18 +158,38 @@ class FunctionNode:
         self.body = body
 
     def compile(self, stream):
-        pass
+        fnid = get_unique_loop_id()
+        skiplbl = f"FUNC_SKIP_{fnid}"
+        entrylbl = f"FUNC_ENTRY_{fnid}"
+        stream.append([opc.jmp, skiplbl])
+        stream.append(["LABEL", entrylbl])
+        for stmt in self.body:
+            stmt.compile(stream)
+        stream.append([opc.ld, None])
+        stream.append([opc.ret])
+        stream.append(["LABEL", skiplbl])
+        fnobj = Function(self.params, entrylbl)
+        stream.append([opc.ld, fnobj])
+        stream.append([opc.varset, self.name])
 
 class CallNode:
     def __init__(self, name, args):
-        self.name, self.args = name, args
+        self.name = name
+        self.args = args
 
     def compile(self, stream):
-        pass
+        for arg in self.args:
+            arg.compile(stream)
+        stream.append([opc.varget, self.name])
+        stream.append([opc.call, len(self.args)])
 
 class ReturnNode:
     def __init__(self, expr):
         self.expr = expr
 
     def compile(self, stream):
-        pass
+        if self.expr:
+            self.expr.compile(stream)
+        else:
+            stream.append([opc.ld, None])
+        stream.append([opc.ret])
