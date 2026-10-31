@@ -1,6 +1,7 @@
 import os
 
-# micro nodes
+# microbe nodes
+# forked from micro
 # by las-r
 
 # exceptions

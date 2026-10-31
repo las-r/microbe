@@ -1,6 +1,7 @@
 import re
 
-# micro lexer
+# microbe lexer
+# forked from micro
 # by las-r
 
 # regex pattern

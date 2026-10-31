@@ -4,7 +4,8 @@ from . import lexer
 from . import parser
 from . import nodes
 
-# micro
+# microbe
+# forked from micro
 # by las-r
 
 # inbuilt functions

@@ -1,6 +1,7 @@
 from .nodes import *
 
-# micro parser
+# microbe parser
+# forked from micro
 # by las-r
 
 # operator lists
