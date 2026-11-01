@@ -62,7 +62,7 @@ def main():
 
     # vm
     mvm = vm.MicrobeVM(stream, natives)
-    vm.execute()
+    mvm.execute()
         
 if __name__ == "__main__":
     main()

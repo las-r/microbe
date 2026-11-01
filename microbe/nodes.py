@@ -11,14 +11,6 @@ def get_unique_loop_id():
     loopc += 1
     return loopc
 
-# exceptions
-class Break(Exception):
-    pass
-
-class Return(Exception):
-    def __init__(self, value):
-        self.value = value
-
 # function object
 class Function:
     def __init__(self, params, entry):
