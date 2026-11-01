@@ -5,6 +5,7 @@ import microbe.opcodes as opc
 # by las-r
 
 # loop counter
+loopstack = []
 loopc = 0
 def get_unique_loop_id():
     global loopc
@@ -129,8 +130,10 @@ class WhileNode:
         stream.append(["LABEL", startlbl])
         self.cond.compile(stream)
         stream.append([opc.jmpifn, endlbl])
+        loopstack.append(endlbl)
         for stmt in self.body:
             stmt.compile(stream)
+        loopstack.pop()
         stream.append([opc.jmp, startlbl])
         stream.append(["LABEL", endlbl])
 
@@ -139,8 +142,9 @@ class BreakNode:
         pass
 
     def compile(self, stream):
-        lbl = f"WHILE_END_{loopc}"
-        stream.append([opc.jmp, lbl])
+        if not loopstack:
+            raise SyntaxError("break outside loop")
+        stream.append([opc.jmp, loopstack[-1]])
 
 # function nodes
 class FunctionNode:
